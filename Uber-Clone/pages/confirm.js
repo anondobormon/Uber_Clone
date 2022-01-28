@@ -1,10 +1,17 @@
-import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import tw from "tailwind-styled-components";
 import Map from "./components/Map";
+import RideSelector from "./components/RideSelector";
 
 const confirm = () => {
-  const getPickUoCoordinates = () => {
-    const pickUp = "Santa Monica";
+  const [pickUpCoordinates, setPickUpCoordinates] = useState();
+  const [dropOffCoordinates, setDropOffCoordinates] = useState();
+  const router = useRouter();
+  const { pickUp, dropOff } = router.query;
+  console.log(pickUp, dropOff);
+
+  const getPickUoCoordinates = (pickUp) => {
     fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${pickUp}.json?` +
         new URLSearchParams({
@@ -15,12 +22,11 @@ const confirm = () => {
     )
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.features[0].center);
+        setPickUpCoordinates(data.features[0].center);
       });
   };
 
-  const getDropOffCoordinates = () => {
-    const dropOff = "Los Angeles";
+  const getDropOffCoordinates = (dropOff) => {
     fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${dropOff}.json?` +
         new URLSearchParams({
@@ -31,19 +37,27 @@ const confirm = () => {
     )
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.features[0].center);
+        setDropOffCoordinates(data.features[0].center);
       });
   };
 
   useEffect(() => {
-    getPickUoCoordinates();
-    getDropOffCoordinates();
-  }, []);
+    getPickUoCoordinates(pickUp);
+    getDropOffCoordinates(dropOff);
+  }, [pickUp, dropOff]);
 
   return (
     <Wrapper>
-      <Map />
-      <ConfirmRideContainer></ConfirmRideContainer>
+      <Map
+        pickUpCoordinates={pickUpCoordinates}
+        dropOffCoordinates={dropOffCoordinates}
+      />
+      <ConfirmRideContainer>
+        <RideSelector />
+        <ConfirmButtonContainer>
+          <ConfirmButton>Confirm UberX</ConfirmButton>
+        </ConfirmButtonContainer>
+      </ConfirmRideContainer>
     </Wrapper>
   );
 };
@@ -54,5 +68,13 @@ const Wrapper = tw.div`
 flex flex-col h-screen 
 `;
 const ConfirmRideContainer = tw.div`
-    flex-1
+    flex flex-1 flex-col h-1/2
+`;
+
+const ConfirmButtonContainer = tw.div`
+  border-t-2
+`;
+
+const ConfirmButton = tw.div`
+bg-black text-white mx-4 my-4 py-4 text-center
 `;

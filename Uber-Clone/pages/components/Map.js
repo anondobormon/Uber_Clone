@@ -5,7 +5,7 @@ import tw from "tailwind-styled-components";
 mapboxgl.accessToken =
   "pk.eyJ1IjoiYW5vbmRvIiwiYSI6ImNreXZrZWpuMjAxNWszMXBxcXJvNzNhMHEifQ.1lUh7mHwLCwbPo_9sMKSWg";
 
-const Map = () => {
+const Map = ({ pickUpCoordinates, dropOffCoordinates }) => {
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: "map",
@@ -13,13 +13,19 @@ const Map = () => {
       center: [-99.29011, 39.39172],
       zoom: 3,
     });
-    addToMap(map);
-  });
+    if (pickUpCoordinates) {
+      addToMap(map, pickUpCoordinates);
+    }
+    if (dropOffCoordinates) {
+      addToMap(map, dropOffCoordinates);
+    }
+    if (pickUpCoordinates && dropOffCoordinates) {
+      map.fitBounds([pickUpCoordinates, dropOffCoordinates], { padding: 60 });
+    }
+  }, [pickUpCoordinates, dropOffCoordinates]);
 
-  const addToMap = (map) => {
-    const marker1 = new mapboxgl.Marker()
-      .setLngLat([12.554729, 55.70651])
-      .addTo(map);
+  const addToMap = (map, coordinates) => {
+    const marker1 = new mapboxgl.Marker().setLngLat(coordinates).addTo(map);
   };
 
   return <Wrapper id="map"></Wrapper>;
@@ -28,5 +34,5 @@ const Map = () => {
 export default Map;
 
 const Wrapper = tw.div`
-    flex-1
+    flex-1 h-1/2
 `;
